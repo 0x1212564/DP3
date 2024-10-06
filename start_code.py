@@ -10,38 +10,42 @@ from gui_wrapper import AttractieToevoegenDialoog, AttractieBewerkenDialoog, Att
 class VoorzieningenWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        # Build main window
         self.setup_window()
+
+        # Setup database
         self.setup_database()
 
-        # Haal attracties op en vul de tabel
+        # Retrieve attractions and build table
         self.load_and_fill_table()
 
-        # Voeg knoppen toe voor bewerkingen
+        # Add buttons for editing, addition, deletion
         self.add_buttons()
 
         # Setup search bar
         self.setup_search_bar()
 
     def setup_window(self):
-        """Set up the main window."""
+        # Setup main window.
         self.setWindowTitle("Attractie beheer")
         self.setGeometry(100, 100, 1200, 800)
 
-        # Hoofdwidget en layout
+        # Main widget and layout.
         self.central_widget = QWidget(self)
         self.layout = QGridLayout(self.central_widget)
         self.setCentralWidget(self.central_widget)
 
     def setup_database(self):
-        """Set up database connection."""
+        # Setup database connection.
         self.db = Database(host="localhost", gebruiker="user", wachtwoord="password", database="attractiepark_software")
         self.db.connect()
 
     def load_and_fill_table(self):
-        """Load data from the database and populate the table."""
+        #Load data from the database and populate the table.
         self.attracties = self.attracties_ophalen()
 
-        # Definieer de attributen van een attractie
+        # Define attributes for the table.
         self.attributen_attractie = [
             {"naam": "Naam", "type": "string", "verplicht": True},
             {"naam": "Type", "type": "options", "opties": ["Achtbaan", "Water", "Draaien", "Familie", "Simulator"],
@@ -57,35 +61,35 @@ class VoorzieningenWindow(QMainWindow):
             {"naam": "Product", "type": "string", "verplicht": False},
         ]
 
-        # Tabel instellen
+        # Build table.
         self.setup_table()
         self.vul_tabel()
 
     def setup_table(self):
-        """Create and set up the QTableWidget."""
+        #Create and set up the QTableWidget.
         self.attractie_tabel = QTableWidget(self)
         self.attractie_tabel.setColumnCount(len(self.attributen_attractie))
         self.attractie_tabel.setHorizontalHeaderLabels([attr["naam"] for attr in self.attributen_attractie])
         self.layout.addWidget(self.attractie_tabel, 1, 0, 1, 3)  # Adjust row placement
 
     def setup_search_bar(self):
-        """Create and set up the search bar."""
+        # Create and setup search bar.
         self.search_bar = QLineEdit(self)
         self.search_bar.setPlaceholderText("Zoek attracties (bijv. id:7)...")
         self.search_bar.returnPressed.connect(self.filter_table)  # Use returnPressed for search
         self.layout.addWidget(self.search_bar, 0, 0, 1, 3)  # Add search bar to layout
 
     def filter_table(self):
-        """Filter the table based on the search input."""
+        #Filter table based on user input.
         search_text = self.search_bar.text().strip()
 
-        # Default to all attractions if the input is empty
+        # Default to all attractions if the input is empty.
         if not search_text:
             self.attracties = self.attracties_ophalen()
             self.vul_tabel()
             return
 
-        # Use match-case to decide what the user is filtering
+        # Use match-case to decide what the user is filtering.
         match search_text.split(":"):
             case ["id", id_value]:
                 try:
@@ -196,16 +200,16 @@ class VoorzieningenWindow(QMainWindow):
 
             case ["product", product]:
                 self.attracties = self.attracties_ophalen_by_filter("product", product.strip())
-            # Add more cases for other filters as needed
+            # Add more cases for other filters as needed.
 
             case _:
                 print("Unknown filter.")
                 self.attracties = self.attracties_ophalen()
 
-        self.vul_tabel()  # Update the table with the filtered data
+        self.vul_tabel()  # Update the table with the filtered data.
 
     def add_buttons(self):
-        """Add buttons for adding, editing, and deleting rows."""
+        #Add buttons for adding, editing, and deleting rows.
         self.toevoegen_button = QPushButton("Toevoegen", self)
         self.toevoegen_button.clicked.connect(self.toevoegen_voorziening)
         self.layout.addWidget(self.toevoegen_button, 2, 0)
@@ -219,7 +223,7 @@ class VoorzieningenWindow(QMainWindow):
         self.layout.addWidget(self.bewerken_button, 2, 2)
 
     def attracties_ophalen(self):
-        """Fetch all attraction data from the database."""
+        # Fetch all attraction data from the database.
         query = """
         SELECT naam, type, overdekt, geschatte_wachttijd, doorlooptijd, actief, 
                attractie_min_lengte, attractie_max_lengte, attractie_min_leeftijd, 
@@ -229,7 +233,8 @@ class VoorzieningenWindow(QMainWindow):
         return self.db.execute_query(query)
 
     def attracties_ophalen_by_filter(self, column_name, value, condition='='):
-        """Fetch attractions based on a specified column and value from the database."""
+
+        # Fetch attractions based on a specified column and value from the database.
         column_mapping = {
             "id": "id",
             "naam": "naam",
@@ -246,7 +251,7 @@ class VoorzieningenWindow(QMainWindow):
         }
 
         if column_name in column_mapping:
-            if condition == 'IS NULL':
+            if condition == 'IS NULL': # SQL query for NULL datatypes.
                 query = f"""
                 SELECT naam, type, overdekt, geschatte_wachttijd, doorlooptijd, actief, 
                        attractie_min_lengte, attractie_max_lengte, attractie_min_leeftijd, 
@@ -264,41 +269,39 @@ class VoorzieningenWindow(QMainWindow):
                 return self.db.execute_query(query, (value,))
         else:
             print("Invalid column name.")
-            return []  # Return an empty list for invalid column names
+            return []  # Return an empty list for invalid column names.
 
     def vul_tabel(self):
-        """Fill the table with data."""
+        # Fill the table with data.
         self.attractie_tabel.setRowCount(len(self.attracties))
         for rij, attractie in enumerate(self.attracties):
             for kolom, waarde in enumerate(attractie):
                 self.attractie_tabel.setItem(rij, kolom, QTableWidgetItem(str(waarde)))
 
     def refresh_data(self):
-        self.setup_window()
-        self.setup_database()
-        self.load_and_fill_table()
-        self.add_buttons()
-        self.setup_search_bar()
+        self.setup_window() # Builds main window.
+        self.setup_database() # Connects database.
+        self.load_and_fill_table() # Loads attributes table and fills the table
+        self.add_buttons() # Adds buttons for deletion, editing, addition
+        self.setup_search_bar() # Adds search bar
 
     def toevoegen_voorziening(self):
-        """Handle adding a new attraction."""
-        dialog = AttractieToevoegenDialoog(self)
-        if dialog.exec_() == QDialog.Accepted:
-            dialog.add_into_database()
-        self.refresh_data()
+        # Handle adding a new attraction.
+        dialog = AttractieToevoegenDialoog(self) # Connects to class in the gui wrapper for adding new attractions.
+        dialog.exec_() # Execute main function in class
+        self.refresh_data() # Refreshes the window to show changes.
 
     def bewerken_voorziening(self):
-        """Handle editing an attraction."""
-        dialog = AttractieBewerkenDialoog(self)
-        if dialog.exec_() == QDialog.Accepted:
-            print("Attractie bewerken:", dialog.get_IOdata())
-        self.refresh_data()
+        # Handle editing an attraction.
+        dialog = AttractieBewerkenDialoog(self) # Connects to class in the gui wrapper for editing attractions.
+        dialog.exec_() # Execute main function in class
+        self.refresh_data() # Refreshes the table to show changes.
 
     def verwijderen_voorziening(self):
-        """Handle deleting an attraction."""
-        dialog = AttractieVerwijderenDialoog(self)
-        dialog.exec_()
-        self.refresh_data()
+        # Handle deleting an attraction.
+        dialog = AttractieVerwijderenDialoog(self) # Connects to class in the gui wrapper for deleting attractions.
+        dialog.exec_()  # Execute main function in class type shit. (im getting tired of adding documentation)
+        self.refresh_data() # Refreshes table to show changes.
 
 
 if __name__ == "__main__":

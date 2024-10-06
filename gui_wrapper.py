@@ -2,10 +2,9 @@ from PyQt5.QtWidgets import (
     QPushButton, QLineEdit, QLabel, QDialog,
     QVBoxLayout, QGridLayout, QComboBox, QMessageBox
 )
-
 from database_wrapper import Database
 
-# Toevoeging van een dialoogvenster voor het bewerken van attracties
+# Attraction addition dialogue and logic
 class AttractieToevoegenDialoog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -13,64 +12,64 @@ class AttractieToevoegenDialoog(QDialog):
 
         self.layout = QGridLayout(self)
 
-        # Naam invoerveld
+        # Naam entry label
         self.naam_label = QLabel("naam:")
         self.naam_entry = QLineEdit(self)
         self.layout.addWidget(self.naam_label, 1, 0)
         self.layout.addWidget(self.naam_entry, 1, 1)
 
-        # Type invoerveld
+        # Type entry label
         self.type_label = QLabel("type:")
         self.type_entry = QComboBox(self)
         self.type_entry.addItems(["achtbaan", "water", "draaien", "familie", "simulator"])
         self.layout.addWidget(self.type_label, 2, 0)
         self.layout.addWidget(self.type_entry, 2, 1)
 
-        # Overdekt (ja/nee) invoerveld
+        # Overdekt (ja/nee) entry label
         self.overdekt_label = QLabel("overdekt:")
         self.overdekt_entry = QComboBox(self)
         self.overdekt_entry.addItems(["Ja", "Nee"])
         self.layout.addWidget(self.overdekt_label, 3, 0)
         self.layout.addWidget(self.overdekt_entry, 3, 1)
 
-        # Geschatte wachttijd invoerveld
+        # Geschatte wachttijd entry label
         self.wachttijd_label = QLabel("Geschatte Wachttijd (min):")
         self.wachttijd_entry = QLineEdit(self)
         self.layout.addWidget(self.wachttijd_label, 4, 0)
         self.layout.addWidget(self.wachttijd_entry, 4, 1)
 
-        # Doorlooptijd invoerveld
+        # Doorlooptijd entry label
         self.doorlooptijd_label = QLabel("Doorlooptijd (min):")
         self.doorlooptijd_entry = QLineEdit(self)
         self.layout.addWidget(self.doorlooptijd_label, 5, 0)
         self.layout.addWidget(self.doorlooptijd_entry, 5, 1)
 
-        # Actief (ja/nee) invoerveld
+        # Actief (ja/nee) entry label
         self.actief_label = QLabel("Actief:")
         self.actief_entry = QComboBox(self)
         self.actief_entry.addItems(["Ja", "Nee"])
         self.layout.addWidget(self.actief_label, 6, 0)
         self.layout.addWidget(self.actief_entry, 6, 1)
 
-        # Minimale lengte invoerveld
+        # Minimale lengte entry label
         self.min_lengte_label = QLabel("Minimale Lengte (cm):")
         self.min_lengte_entry = QLineEdit(self)
         self.layout.addWidget(self.min_lengte_label, 7, 0)
         self.layout.addWidget(self.min_lengte_entry, 7, 1)
 
-        # Maximale lengte invoerveld
+        # Maximale lengte entry label
         self.max_lengte_label = QLabel("Maximale Lengte (cm):")
         self.max_lengte_entry = QLineEdit(self)
         self.layout.addWidget(self.max_lengte_label, 8, 0)
         self.layout.addWidget(self.max_lengte_entry, 8, 1)
 
-        # Minimale leeftijd invoerveld
+        # Minimale leeftijd entry label
         self.min_leeftijd_label = QLabel("Minimale Leeftijd:")
         self.min_leeftijd_entry = QLineEdit(self)
         self.layout.addWidget(self.min_leeftijd_label, 9, 0)
         self.layout.addWidget(self.min_leeftijd_entry, 9, 1)
 
-        # Maximale gewicht invoerveld
+        # Maximale gewicht entry label
         self.max_gewicht_label = QLabel("Maximale Gewicht (kg):")
         self.max_gewicht_entry = QLineEdit(self)
         self.layout.addWidget(self.max_gewicht_label, 10, 0)
@@ -82,7 +81,7 @@ class AttractieToevoegenDialoog(QDialog):
         self.layout.addWidget(self.product_label, 11, 0)
         self.layout.addWidget(self.product_entry, 11, 1)
 
-        # Opslaan en annuleren knoppen
+        # Opslaan and Annuleren buttons
         self.opslaan_button = QPushButton("Toevoegen", self)
         self.opslaan_button.clicked.connect(self.accept)
         self.annuleren_button = QPushButton("Annuleren", self)
@@ -109,13 +108,13 @@ class AttractieToevoegenDialoog(QDialog):
         }
 
     def add_into_database(self):
-        data = self.get_IOdata()
+        data = self.get_IOdata() #fetch data
 
         try:
             db = Database(host="localhost", gebruiker="user", wachtwoord="password", database="attractiepark_software")
             db.connect()
 
-            # SQL-query om een attractie toe te voegen
+            # SQL-query to add into the table
             query = """
             INSERT INTO voorziening (naam, type, overdekt, geschatte_wachttijd, doorlooptijd, actief, attractie_min_lengte, attractie_max_lengte, attractie_min_leeftijd, attractie_max_gewicht, productaanbod) 
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -153,7 +152,7 @@ class AttractieToevoegenDialoog(QDialog):
             print("Fout bij uitvoeren van query:", e)
             db.close()
 
-# Toevoeging van een dialoogvenster voor het bewerken van attracties
+# Attraction editing dialogue and logic
 class AttractieBewerkenDialoog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -163,7 +162,7 @@ class AttractieBewerkenDialoog(QDialog):
         # Set up the layout for the dialog using QGridLayout
         self.layout = QGridLayout(self)
 
-        # ID invoerveld
+        # ID entry label
         self.id_label = QLabel("Attractie ID:")
         self.id_input = QLineEdit(self)
         self.layout.addWidget(self.id_label, 0, 0)
@@ -174,39 +173,39 @@ class AttractieBewerkenDialoog(QDialog):
         self.search_button.clicked.connect(self.fetch_data)
         self.layout.addWidget(self.search_button, 0, 2)
 
-        # Naam invoerveld
+        # Naam entry label
         self.naam_label = QLabel("Naam:")
         self.naam_entry = QLineEdit(self)
         self.layout.addWidget(self.naam_label, 1, 0)
         self.layout.addWidget(self.naam_entry, 1, 1)
 
-        # Type invoerveld
+        # Type entry label
         self.type_label = QLabel("Type:")
         self.type_entry = QComboBox(self)
         self.type_entry.addItems(["Achtbaan", "Water", "Draaien", "Familie", "Simulator"])
         self.layout.addWidget(self.type_label, 2, 0)
         self.layout.addWidget(self.type_entry, 2, 1)
 
-        # Overdekt (ja/nee) invoerveld
+        # Overdekt (ja/nee) entry label
         self.overdekt_label = QLabel("Overdekt:")
         self.overdekt_entry = QComboBox(self)
         self.overdekt_entry.addItems(["Ja", "Nee"])
         self.layout.addWidget(self.overdekt_label, 3, 0)
         self.layout.addWidget(self.overdekt_entry, 3, 1)
 
-        # Geschatte wachttijd invoerveld
+        # Geschatte wachttijd entry label
         self.wachttijd_label = QLabel("Geschatte Wachttijd (min):")
         self.wachttijd_entry = QLineEdit(self)
         self.layout.addWidget(self.wachttijd_label, 4, 0)
         self.layout.addWidget(self.wachttijd_entry, 4, 1)
 
-        # Doorlooptijd invoerveld
+        # Doorlooptijd entry label
         self.doorlooptijd_label = QLabel("Doorlooptijd (min):")
         self.doorlooptijd_entry = QLineEdit(self)
         self.layout.addWidget(self.doorlooptijd_label, 5, 0)
         self.layout.addWidget(self.doorlooptijd_entry, 5, 1)
 
-        # Actief (ja/nee) invoerveld
+        # Actief (ja/nee) entry label
         self.actief_label = QLabel("Actief:")
         self.actief_entry = QComboBox(self)
         self.actief_entry.addItems(["Ja", "Nee"])
@@ -297,6 +296,7 @@ class AttractieBewerkenDialoog(QDialog):
 
 
     def fill_form_with_data(self, data):
+        # Fills editing gui with the existing data.
         self.naam_entry.setText(data[0])
         self.type_entry.setCurrentText(data[1])
         self.overdekt_entry.setCurrentText("Ja" if data[2] == 1 else "Nee")
@@ -311,6 +311,7 @@ class AttractieBewerkenDialoog(QDialog):
 
 
     def get_IOdata(self):
+        # Retrieves data and returns it.
         return {
             "naam": self.naam_entry.text(),
             "type": self.type_entry.currentText(),
@@ -329,9 +330,11 @@ class AttractieBewerkenDialoog(QDialog):
     def update_database(self):
         data = self.get_IOdata()  # Collect data from form
         try:
+            # Connect the database.
             db = Database(host="localhost", gebruiker="user", wachtwoord="password", database="attractiepark_software")
             db.connect()
 
+            # SQL query to update data in the table, place holders get filled in with data retrieved from the form.
             query = """
             UPDATE voorziening 
             SET 
@@ -349,7 +352,7 @@ class AttractieBewerkenDialoog(QDialog):
             WHERE 
                 id = %s
                     """
-
+            # Params for the placeholders in the SQL query.
             params = (
                 data["naam"],  # naam is a string
                 data["type"],  # type is a string
@@ -365,6 +368,7 @@ class AttractieBewerkenDialoog(QDialog):
                 data["id"],
             )
 
+            # Debugging.
             print(f"Data to change: {data}")
             print("Verbonden met de database!")
             print("Query:", query)
@@ -375,11 +379,11 @@ class AttractieBewerkenDialoog(QDialog):
             QMessageBox.information(self, "Succes", "Attractie succesvol bijgewerkt.")
             db.close()
 
-        except Exception as e:
+        except Exception as e: # Error catching.
             print("Fout bij uitvoeren van query:", e)
             db.close()
 
-# Toevoeging van een dialoogvenster voor het verwijderen van attracties
+# Attraction deletion dialogue and logic
 class AttractieVerwijderenDialoog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -388,18 +392,18 @@ class AttractieVerwijderenDialoog(QDialog):
         # Layout
         self.layout = QVBoxLayout(self)
 
-        # Attractie ID invoerveld
+        # Attractie ID entry label
         self.id_label = QLabel("Attractie ID:")
         self.id_input = QLineEdit(self)
         self.layout.addWidget(self.id_label)
         self.layout.addWidget(self.id_input)
 
-        # Verwijderen knop
+        # Verwijderen button
         self.verwijder_button = QPushButton("Verwijderen", self)
         self.verwijder_button.clicked.connect(self.verwijder_attractie)
         self.layout.addWidget(self.verwijder_button)
 
-        # Annuleren knop
+        # Annuleren button
         self.annuleren_button = QPushButton("Annuleren", self)
         self.annuleren_button.clicked.connect(self.reject)
         self.layout.addWidget(self.annuleren_button)
@@ -407,15 +411,16 @@ class AttractieVerwijderenDialoog(QDialog):
     def verwijder_attractie(self):
         attractie_id = self.id_input.text().strip()
 
-        if not attractie_id.isdigit():
+        if not attractie_id.isdigit(): # Error catching for invalid ID.
             QMessageBox.warning(self, "Ongeldig ID", "Voer een geldig numeriek attractie ID in.")
             return
 
         try:
+            # Connect to the database.
             db = Database(host="localhost", gebruiker="user", wachtwoord="password", database="attractiepark_software")
             db.connect()
 
-            # Controleer of de attractie bestaat
+            # Check if the attraction exists.
             select_query = "SELECT * FROM voorziening WHERE id = %s"
             result = db.execute_query(select_query, (attractie_id,))
             if not result:
@@ -423,7 +428,7 @@ class AttractieVerwijderenDialoog(QDialog):
                 db.close()
                 return
 
-            # Verwijder de attractie
+            # Delete the attraction.
             delete_query = "DELETE FROM voorziening WHERE id = %s"
             db.execute_query(delete_query, (attractie_id,))
 
@@ -431,6 +436,6 @@ class AttractieVerwijderenDialoog(QDialog):
             db.close()
 
 
-        except Exception as e:
+        except Exception as e: # Error catching.
             QMessageBox.critical(self, "Fout", f"Fout bij het verwijderen van de attractie: {e}")
             db.close()
