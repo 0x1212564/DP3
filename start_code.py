@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QGridLayout, QDialog
+    QApplication, QMainWindow, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QGridLayout, QDialog,
+    QLineEdit, QLabel
 )
 from PyQt5.QtCore import Qt
 from database_wrapper import Database
@@ -17,6 +18,9 @@ class VoorzieningenWindow(QMainWindow):
 
         # Voeg knoppen toe voor bewerkingen
         self.add_buttons()
+
+        # Setup search bar
+        self.setup_search_bar()
 
     def setup_window(self):
         """Set up the main window."""
@@ -39,17 +43,18 @@ class VoorzieningenWindow(QMainWindow):
 
         # Definieer de attributen van een attractie
         self.attributen_attractie = [
-            {"naam": "naam", "type": "string", "verplicht": True},
-            {"naam": "type", "type": "options", "opties": ["Achtbaan", "Water", "Draaien", "Familie", "Simulator"], "verplicht": True},
-            {"naam": "overdekt", "type": "int", "verplicht": True},
-            {"naam": "geschatte wachttijd", "type": "int", "verplicht": True},
-            {"naam": "doorlooptijd", "type": "int", "verplicht": True},
-            {"naam": "actief", "type": "boolean", "verplicht": True},
-            {"naam": "min lengte", "type": "int"},
-            {"naam": "max lengte", "type": "int"},
-            {"naam": "min leeftijd", "type": "int"},
-            {"naam": "max gewicht", "type": "int"},
-            {"naam": "product", "type": "string", "verplicht": False},
+            {"naam": "Naam", "type": "string", "verplicht": True},
+            {"naam": "Type", "type": "options", "opties": ["Achtbaan", "Water", "Draaien", "Familie", "Simulator"],
+             "verplicht": True},
+            {"naam": "Overdekt", "type": "boolean", "verplicht": True},
+            {"naam": "geschatteWachttijd", "type": "int", "verplicht": True},
+            {"naam": "Doorlooptijd", "type": "int", "verplicht": True},
+            {"naam": "Actief", "type": "boolean", "verplicht": True},
+            {"naam": "minLengte", "type": "int"},
+            {"naam": "maxLengte", "type": "int"},
+            {"naam": "minLeeftijd", "type": "int"},
+            {"naam": "maxGewicht", "type": "int"},
+            {"naam": "Product", "type": "string", "verplicht": False},
         ]
 
         # Tabel instellen
@@ -61,24 +66,160 @@ class VoorzieningenWindow(QMainWindow):
         self.attractie_tabel = QTableWidget(self)
         self.attractie_tabel.setColumnCount(len(self.attributen_attractie))
         self.attractie_tabel.setHorizontalHeaderLabels([attr["naam"] for attr in self.attributen_attractie])
-        self.layout.addWidget(self.attractie_tabel, 0, 0, 1, 3)
+        self.layout.addWidget(self.attractie_tabel, 1, 0, 1, 3)  # Adjust row placement
+
+    def setup_search_bar(self):
+        """Create and set up the search bar."""
+        self.search_bar = QLineEdit(self)
+        self.search_bar.setPlaceholderText("Zoek attracties (bijv. id:7)...")
+        self.search_bar.returnPressed.connect(self.filter_table)  # Use returnPressed for search
+        self.layout.addWidget(self.search_bar, 0, 0, 1, 3)  # Add search bar to layout
+
+    def filter_table(self):
+        """Filter the table based on the search input."""
+        search_text = self.search_bar.text().strip()
+
+        # Default to all attractions if the input is empty
+        if not search_text:
+            self.attracties = self.attracties_ophalen()
+            self.vul_tabel()
+            return
+
+        # Use match-case to decide what the user is filtering
+        match search_text.split(":"):
+            case ["id", id_value]:
+                try:
+                    id_value = int(id_value)
+                    self.attracties = self.attracties_ophalen_by_filter("id", id_value)
+                except ValueError:
+                    print("Invalid ID format.")
+                    self.attracties = self.attracties_ophalen()
+
+            case ["naam", name]:
+                self.attracties = self.attracties_ophalen_by_filter("naam", name.strip())
+
+            case ["type", attraction_type]:
+                self.attracties = self.attracties_ophalen_by_filter("type", attraction_type.strip())
+
+            case ["overdekt", overdekt_value]:
+                try:
+                    overdekt_value = int(overdekt_value)
+                    if overdekt_value in (0, 1):
+                        self.attracties = self.attracties_ophalen_by_filter("overdekt", overdekt_value)
+                    else:
+                        print("Invalid value for overdekt. Must be 0 or 1.")
+                        self.attracties = self.attracties_ophalen()
+                except ValueError:
+                    print("Invalid format for overdekt.")
+                    self.attracties = self.attracties_ophalen()
+
+            case ["wachttijd", wait_time_value]:
+                try:
+                    wait_time_value = int(wait_time_value)
+                    self.attracties = self.attracties_ophalen_by_filter("wachttijd", wait_time_value,
+                                                                        condition='<=')
+                except ValueError:
+                    print("Invalid format for geschatte wachttijd.")
+                    self.attracties = self.attracties_ophalen()
+
+            case ["doorlooptijd", duration_value]:
+                try:
+                    duration_value = int(duration_value)
+                    self.attracties = self.attracties_ophalen_by_filter("doorlooptijd", duration_value, condition='<=')
+                except ValueError:
+                    print("Invalid format for doorlooptijd.")
+                    self.attracties = self.attracties_ophalen()
+
+            case ["actief", actief_value]:
+                try:
+                    actief_value = int(actief_value)
+                    if actief_value in (0, 1):
+                        self.attracties = self.attracties_ophalen_by_filter("actief", actief_value)
+                    else:
+                        print("Invalid value for actief. Must be 0 or 1.")
+                        self.attracties = self.attracties_ophalen()
+                except ValueError:
+                    print("Invalid format for actief.")
+                    self.attracties = self.attracties_ophalen()
+
+            case ["minLengte", min_length_value]:
+                if min_length_value.lower() == "none":
+                    self.attracties = self.attracties_ophalen_by_filter("minLengte", None,
+                                                                        condition='IS NULL')
+                else:
+                    try:
+                        min_length_value = int(min_length_value)
+                        self.attracties = self.attracties_ophalen_by_filter("minLengte", min_length_value,
+                                                                            condition='>=')
+                    except ValueError:
+                        print("Invalid format for min lengte.")
+                        self.attracties = self.attracties_ophalen()
+
+            case ["maxLengte", max_length_value]:
+                if max_length_value.lower() == "none":
+                    self.attracties = self.attracties_ophalen_by_filter("maxLengte", None,
+                                                                        condition='IS NULL')
+                else:
+                    try:
+                        max_length_value = int(max_length_value)
+                        self.attracties = self.attracties_ophalen_by_filter("maxLengte", max_length_value,
+                                                                            condition='<=')
+                    except ValueError:
+                        print("Invalid format for max lengte.")
+                        self.attracties = self.attracties_ophalen()
+
+            case ["minLeeftijd", min_age_value]:
+                if min_age_value.lower() == "none":
+                    self.attracties = self.attracties_ophalen_by_filter("minLeeftijd", None,
+                                                                        condition='IS NULL')
+                else:
+                    try:
+                        min_age_value = int(min_age_value)
+                        self.attracties = self.attracties_ophalen_by_filter("minLeeftijd", min_age_value,
+                                                                            condition='>=')
+                    except ValueError:
+                        print("Invalid format for min leeftijd.")
+                        self.attracties = self.attracties_ophalen()
+
+            case ["maxGewicht", max_weight_value]:
+                if max_weight_value.lower() == "none":
+                    self.attracties = self.attracties_ophalen_by_filter("maxGewicht", None,
+                                                                        condition='IS NULL')
+                else:
+                    try:
+                        max_weight_value = int(max_weight_value)
+                        self.attracties = self.attracties_ophalen_by_filter("maxGewicht", max_weight_value,
+                                                                            condition='<=')
+                    except ValueError:
+                        print("Invalid format for max gewicht.")
+                        self.attracties = self.attracties_ophalen()
+
+            case ["product", product]:
+                self.attracties = self.attracties_ophalen_by_filter("product", product.strip())
+            # Add more cases for other filters as needed
+
+            case _:
+                print("Unknown filter.")
+                self.attracties = self.attracties_ophalen()
+
+        self.vul_tabel()  # Update the table with the filtered data
 
     def add_buttons(self):
         """Add buttons for adding, editing, and deleting rows."""
         self.toevoegen_button = QPushButton("Toevoegen", self)
         self.toevoegen_button.clicked.connect(self.toevoegen_voorziening)
-        self.layout.addWidget(self.toevoegen_button, 1, 0)
+        self.layout.addWidget(self.toevoegen_button, 2, 0)
 
         self.verwijderen_button = QPushButton("Verwijderen", self)
         self.verwijderen_button.clicked.connect(self.verwijderen_voorziening)
-        self.layout.addWidget(self.verwijderen_button, 1, 1)
+        self.layout.addWidget(self.verwijderen_button, 2, 1)
 
         self.bewerken_button = QPushButton("Bewerken", self)
         self.bewerken_button.clicked.connect(self.bewerken_voorziening)
-        self.layout.addWidget(self.bewerken_button, 1, 2)
+        self.layout.addWidget(self.bewerken_button, 2, 2)
 
     def attracties_ophalen(self):
-        """Fetch attraction data from the database."""
+        """Fetch all attraction data from the database."""
         query = """
         SELECT naam, type, overdekt, geschatte_wachttijd, doorlooptijd, actief, 
                attractie_min_lengte, attractie_max_lengte, attractie_min_leeftijd, 
@@ -86,6 +227,44 @@ class VoorzieningenWindow(QMainWindow):
         FROM voorziening
         """
         return self.db.execute_query(query)
+
+    def attracties_ophalen_by_filter(self, column_name, value, condition='='):
+        """Fetch attractions based on a specified column and value from the database."""
+        column_mapping = {
+            "id": "id",
+            "naam": "naam",
+            "type": "type",
+            "overdekt": "overdekt",
+            "wachttijd": "geschatte_wachttijd",
+            "doorlooptijd": "doorlooptijd",
+            "actief": "actief",
+            "minLengte": "attractie_min_lengte",
+            "maxLengte": "attractie_max_lengte",
+            "minLeeftijd": "attractie_min_leeftijd",
+            "maxGewicht": "attractie_max_gewicht",
+            "product": "productaanbod"
+        }
+
+        if column_name in column_mapping:
+            if condition == 'IS NULL':
+                query = f"""
+                SELECT naam, type, overdekt, geschatte_wachttijd, doorlooptijd, actief, 
+                       attractie_min_lengte, attractie_max_lengte, attractie_min_leeftijd, 
+                       attractie_max_gewicht, productaanbod 
+                FROM voorziening WHERE {column_mapping[column_name]} IS NULL
+                """
+                return self.db.execute_query(query)
+            else:
+                query = f"""
+                SELECT naam, type, overdekt, geschatte_wachttijd, doorlooptijd, actief, 
+                       attractie_min_lengte, attractie_max_lengte, attractie_min_leeftijd, 
+                       attractie_max_gewicht, productaanbod 
+                FROM voorziening WHERE {column_mapping[column_name]} {condition} %s
+                """
+                return self.db.execute_query(query, (value,))
+        else:
+            print("Invalid column name.")
+            return []  # Return an empty list for invalid column names
 
     def vul_tabel(self):
         """Fill the table with data."""
@@ -99,6 +278,7 @@ class VoorzieningenWindow(QMainWindow):
         self.setup_database()
         self.load_and_fill_table()
         self.add_buttons()
+        self.setup_search_bar()
 
     def toevoegen_voorziening(self):
         """Handle adding a new attraction."""
