@@ -288,13 +288,15 @@ class VoorzieningenWindow(QMainWindow):
     def toevoegen_voorziening(self):
         # Handle adding a new attraction.
         dialog = AttractieToevoegenDialoog(self) # Connects to class in the gui wrapper for adding new attractions.
-        dialog.exec_() # Execute main function in class
+        if dialog.exec_() == QDialog.Accepted:
+            dialog.add_into_database()# Execute main function in class
         self.refresh_data() # Refreshes the window to show changes.
 
     def bewerken_voorziening(self):
         # Handle editing an attraction.
         dialog = AttractieBewerkenDialoog(self) # Connects to class in the gui wrapper for editing attractions.
-        dialog.exec_() # Execute main function in class
+        if dialog.exec_() == QDialog.Accepted:
+            print("Bewerkte attractie: ", dialog.get_IOdata())# Execute main function in class
         self.refresh_data() # Refreshes the table to show changes.
 
     def verwijderen_voorziening(self):

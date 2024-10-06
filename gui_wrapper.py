@@ -149,6 +149,7 @@ class AttractieToevoegenDialoog(QDialog):
             db.close()
 
         except Exception as e:
+            QMessageBox.information(self, "Error", f"Fout bij uitvoeren van query: {str(e)}")
             print("Fout bij uitvoeren van query:", e)
             db.close()
 
@@ -379,7 +380,8 @@ class AttractieBewerkenDialoog(QDialog):
             QMessageBox.information(self, "Succes", "Attractie succesvol bijgewerkt.")
             db.close()
 
-        except Exception as e: # Error catching.
+        except Exception as e:
+            QMessageBox.information(self, "Error", f"Fout bij uitvoeren van query: {str(e)}")
             print("Fout bij uitvoeren van query:", e)
             db.close()
 
