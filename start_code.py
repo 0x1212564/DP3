@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from database_wrapper import Database
-from tkinter_wrapper import AttractieToevoegenDialoog, AttractieBewerkenDialoog, GuiBackEnd, AttractieVerwijderenDialoog
+from gui_wrapper import AttractieToevoegenDialoog, AttractieBewerkenDialoog, GuiBackEnd, AttractieVerwijderenDialoog
 
 
 class VoorzieningenWindow(QMainWindow):
