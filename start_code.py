@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QGridLayout, QDialog,
-    QLineEdit, QLabel
+    QApplication, QMainWindow, QPushButton, QTableWidget, QTableWidgetItem, QWidget, QGridLayout, QDialog,
+    QLineEdit
 )
-from PyQt5.QtCore import Qt
+
 from database_wrapper import Database
-from gui_wrapper import AttractieToevoegenDialoog, AttractieBewerkenDialoog, GuiBackEnd, AttractieVerwijderenDialoog
+from gui_wrapper import AttractieToevoegenDialoog, AttractieBewerkenDialoog, AttractieVerwijderenDialoog
 
 
 class VoorzieningenWindow(QMainWindow):

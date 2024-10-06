@@ -1,40 +1,11 @@
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QLineEdit, QLabel, QDialog,
-    QVBoxLayout, QGridLayout, QComboBox, QMessageBox, QWidget
+    QPushButton, QLineEdit, QLabel, QDialog,
+    QVBoxLayout, QGridLayout, QComboBox, QMessageBox
 )
+
 from database_wrapper import Database
 
-
-class GuiBackEnd(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Voorzieningen Bewerken en Verwijderen")
-
-        # Maak een hoofdwidget en layout
-        self.central_widget = QWidget()
-        self.layout = QGridLayout(self.central_widget)
-
-        self.setCentralWidget(self.central_widget)
-
-        # Voorbeeld van een knop voor toevoegen
-        self.toevoegen_button = QPushButton("Toevoegen", self)
-        self.toevoegen_button.clicked.connect(self.toevoegen_voorziening)
-
-        # Voorbeeld van een knop voor verwijderen
-        self.verwijderen_button = QPushButton("Verwijderen", self)
-        self.verwijderen_button.clicked.connect(self.verwijder_voorziening)
-
-        # Voorbeeld van een knop voor bewerken
-        self.bewerken_button = QPushButton("Bewerken", self)
-        self.bewerken_button.clicked.connect(self.bewerk_voorziening)
-
-        # Voeg knoppen toe aan de layout
-        self.layout.addWidget(self.toevoegen_button, 0, 0)
-        self.layout.addWidget(self.verwijderen_button, 0, 1)
-        self.layout.addWidget(self.bewerken_button, 0, 2)
-
-
-# Toevoeging van een dialoogvenster voor het toevoegen van attracties
+# Toevoeging van een dialoogvenster voor het bewerken van attracties
 class AttractieToevoegenDialoog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -182,7 +153,7 @@ class AttractieToevoegenDialoog(QDialog):
             print("Fout bij uitvoeren van query:", e)
             db.close()
 
-
+# Toevoeging van een dialoogvenster voor het bewerken van attracties
 class AttractieBewerkenDialoog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -408,7 +379,7 @@ class AttractieBewerkenDialoog(QDialog):
             print("Fout bij uitvoeren van query:", e)
             db.close()
 
-
+# Toevoeging van een dialoogvenster voor het verwijderen van attracties
 class AttractieVerwijderenDialoog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
