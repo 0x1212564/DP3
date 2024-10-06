@@ -1,11 +1,3 @@
-Een README bestand met praktische informatie. Lees dit eerst voordat je aan de slag gaat.
+uh,
 
-1. ModuleNotFoundError
-Krijg je de volgende error?
-
-\database_wrapper.py", line 1, in <module>
-    import mysql.connector
-ModuleNotFoundError: No module named 'mysql'
-
-Oplossing: In de terminal van VSCode voer je het volgende uit: pip install mysql-connector
-
+jullie tkinter wrapper is kut in mijn mening dus ik heb de gui wrapper overnieuw geschreven met PyQt5, in 3 uur tijd :)D)D)D)D)DD)
